@@ -1,0 +1,288 @@
+Precor Dc Treadmill Release Notes
+
+Version 0.1.0 11-20-2020
+
+	1. This is the first release.  The console communications is functional except for the person detect interface.
+
+Version 0.2.0 12-02-2020
+
+	1. Added the person detect functionality.
+
+	2. Added the communications lost error.
+	
+Version 0.3.0 01-05-2021
+
+	1. Changed to disable errors on startup as the default
+	2. Increased the adjust delta limit for dyno testing
+	3. Added functions to debug com to enable and disable errors
+	
+Version 0.4.0 02-08-2021
+
+	1. Ported to STM32L431 processor
+	
+Version 0.5.0 03-04-2021
+
+	1. Changed Serial Rx to DMA
+	
+Version 0.6.0 03-16-2021
+
+	1. Lots of updates to the error handling.
+	
+Version 0.7.0 03-18-2021
+
+	1. Ability to adjust the speed stall timeout.
+	2. New over current slow down with error handling.  The current levels and timeouts can be adjusted
+	with serial terminal to allow flexible testing.
+	3. Addition of [xmph] and [xkph] maximum speed or slow down speed depending upon conditions.
+	4. Made the elevation errors a special case so that they no longer force the belt to stop.
+	5. Changed the [mph] and [kph] commands to allow the target speed to be adjusted when there is
+	an elevation error.
+	
+Version 0.7.1 04-05-2021
+
+	1. Changed the AC input current processing to increase the accuracy.  The sample rate is now 4KHz, with 8K samples.
+	This along with some changes to the hardware and software filters to further increase the accuracy.
+
+Version 0.7.2 04-15-2021
+
+	1. Added the watchdog timer reset error.  
+	2. Added some small changes for the person detect at high inclines.  This is not complete.
+	3. Added the error for processing the MCB hardware over current error.
+	
+Version 0.7.3 04-23-2021
+
+	1. Added more changes for the person detect at high inclines.
+	2. Changed over speed error 21 to error 24.
+	3. Changed over acceleration error 22 to error 26.
+	4. Removed elevation runaway error 44.  The error is still there but the timer is continually reset so it won't occur.
+	5. Added error 86 for configuration command responses.  The command will issue and error if the configuration is not a 1
+	or if it takes longer than 20 seconds to receive a valid configuration command.  This error also has the precursor that
+	at least one valid message has been received from the console.
+	6. Added stop switch open error 37.  This is in response to the ESTOP switch being open.  This will also force the generation
+	of the [ESTOP:BAD] message every 3 seconds.  This error is not logged since it being treated internally as warning.
+	The condition will reset when the ESTOP switch is closed.
+	7. Changes to shorten the delay for the speed stall.  The default timeout is now 3.5 seconds if the belt was stationary
+	and the speed sensor was not detected at startup.  The timeout is reduced to 1 second when the belt is moving and the 
+	speed sensor is disconnected.
+	
+Version 0.7.4 04-26-2021
+
+	1. Increase maximum PWM calibration range.
+	2. Fixed problems with stop switch and ESTOP errors.
+	
+Version 0.8.0 05-05-2021
+
+	1. Changed incline to use non-linear interpolation to compensate for treadmill.  Also changed the 
+	default values for maximum ADC (250) and minimum ADC (900).  These values should automatically update when this
+	new version runs for the first time.
+	2. Changed the handling of the over current slow down error to stop and log if the current limit is exceeded when the 
+	speed is 5 MPH or less.  
+	3. Make the operation of the RSET command work like the new communications specification revision H.  
+	
+Version 0.8.1 05-17-2021
+
+	1. Change maximum ADC to 240 and minimum ADC to 889.  These are values recommended by Precor.
+	2. Removed periodic sending of [ESTOP:BAD].  This is now only sent in response to [RSET], when the 
+	ESTOP is open.
+	3. Change the person present to send 1234 ms when the person present is compensating for incline.
+	4. Updated error handing to allow processing multiple different errors at the same time.  The errors are sorted
+	by a priority table.
+	
+Version 0.8.2 05-21-2021
+
+	1. Changed the part number to return a build number in place of the MCB firmware version number.  The 
+	build number will be 001 for this release.
+	2. Changed the maximum metric speed to 20.0 KPH.  This was done by adding a new definition for the 
+	speed to be used in the protocol target speed validation.  Also did a quick check of the metric speed
+	and it was too high (0.3 KPH at 20 KPH).  Lowered the conversion from 190 to 187 for the RPM per unit conversion.
+	3. Found and fixed the case where error code 0 would be returned when nothing should have been returned.
+	4. Removed sending error code 37 in response to an ESTOP.  Also used the debugger to verify that the ESTOP:BAD
+	message is sent every 3 seconds.
+	5. Changed error code 42 (incline range) so that it could be returned even when the incline has not
+	been moved.  This error will not be detected if the treadmill is in ESTOP.  This was verfied using the serial
+	terminal and disconnecting the potentiometer wiper before power up.  Reconnecting the wiper did not clear
+	the error until the ESTOP was cycled.
+	6. Verified the error code 36 is generated when the slow down current is exceeded and the target speed is
+	less than 5.0 MPH.  This was tested by changing the "OC SD Max Current" to 2.0 Amps and starting the treadmill
+	while slowly increasing the speed to 4.5 MPH.
+	7. Error code 25 is the bus enable error and that is a fatal error that requires the MCB to be power cycled.
+	8. New - Added the adjust delta range checking to prevent an underflow, after ESTOP, when adjust delta is a large negative 
+	value.  This was found on a Peloton treadmill, which has a very fast ESTOP recovery.  The Precor recovery from ESTOP 
+	is very slow but better safer than sorry.	
+	
+Version 0.8.3 05-21-2021
+
+	1. Build number is now 2.
+	2. When in the MCB detects the ESTOP condition, it responds to [mph:xx], [kph:xx], and [inc:xx] commands 
+	with [ESTOP:BAD].  Except when the console is still in it's power on delay.  During this period, the 
+	MCB will not allow the belt or incline to move anyway.  The default power up state for the MCB is ESTOP.
+	The MCB will move to the normal state after the start up delay and ESTOP input debounce.
+	3. The incline stall (40) and incline direction (45) are now fatal errors, so they can only be reset with
+	a power cycle.  These error will be resent to the console in response to an [err] command, until a power cycle
+	clears the error.
+	4. The incline range (42) will now automatically reset if the elevation potentiometer is reconnected.
+	5. After reviewing the latest error specification, the AC excess current and speed slow down error numbers have changed
+	to 36 and 38 respectively.  The priority was changed so that the AC excess current is a higher priority than
+	the speed slow down. Also changed the AC excess current so that the 5 second timer is not reset by speed changes.
+	This will prevent the AC excess current from being blocked by a speed slow down event.
+	6. The [xkph] command will now report 20.0 KPH as the maximum speed unless the MCB is in current slow down.
+	7. Added more debugger interface tools for testing the person detect.  It is now possible to see a counter that
+	increments everytime a foot fall response is sent.  You can also change the PD adjust delta limit.  The current 
+	value is -10 but that should propably be -5 for the original belt and deck.
+	
+Version 0.8.4 05-28-2021
+
+	1.	The AC Excess Current error is back to being number 35.
+	2.	The Speed Slowdown error is back to being number 36.
+	3.	All the errors can now be read multiple times, until they are cleared either using the RSET or a power cycle.  
+	The elevation errors, stall and direction, require a power cycle to reset them.  The power cycle will reset all the errors, but the RSET only resets the highest priority error.   If there are multiple errors, they will be read out in priority order.  The same is true for RSET, which will reset errors in priority order.
+	4.	When the elevation stall, range, or direction errors are active, the MCB will respond to any [inc:XX] command 
+	with [inc:BAD].
+	5.	When the active error is anything but an elevation stall, range, or direction, the MCB will respond to any [mph:XX] 
+	with [mph:BAD] or [kph:XX] with [kph:BAD].
+	6.	Anytime the ESTOP is active, the MCB will respond to [mph:XX], [kph:XX], or [inc:XX] with [ESTOP:BAD].  
+	By default, the MCB powers up in the ESTOP state.  The MCB does respond not respond to the speed and incline 
+	commands with [ESTOP:BAD], until the 3 second startup delay timer has expired.  The MCB will not allow any changes 
+	to speed or incline until that timer has expired.
+	
+Version 0.8.5 06-30-2021
+
+	1. Precor Bug ID 74 - Changed the default acceleration time from 25 seconds to 19 seconds.  Also changed the EEPROM, 
+	version, so that it would trigger a "defaults" update, whenever this version is first run on an older board.
+	2. Precor Bug ID 75 - This prevents the incompatible console error from occuring when recovering from a 
+	watchdog reset error.  So if there is a watchdog error, the software just assumes that the console is still
+	compatible.  Also to prevent the console from having an error 37 (ESTOP), checks were added to make sure that the 
+	watchdog error does not occur until after the normal MCB 3 second startup delay.  This same check was also added
+	to the RSET response, to prevent it from responding with ESTOP:BAD, until after the start delay has passed.
+	3. Precor Bug ID 76 - Update the overflow/underflow checking for the PWM output compare ISR.  The new calculation
+	is much more efficient.  Always a good thing to spend less time in periodic ISR that occurs every millisecond.
+	
+Version 0.8.6 07-09-2021
+
+	1. Precor Bug ID 79 - Changes the over current slow down error 36, to check that the treadmill is not accelerating
+	or decelerating and that the average current is still greater than the slow down limit.  Also the speed check for less than
+	5 MPH now compares the actual speed not the target speed.
+	2. Precor Bug ID 80 - Changed the over current slow down timer from 3 seconds to 4.5 seconds.
+	
+Version 0.8.7 07-29-2021
+
+	1. Precor Bug ID 17279 - Added check to make sure that the current PWM is equal to the target PWM before 
+	sending a foot fall response.
+	2. Precor Bug ID 17272 - Change te watchdog error 12 delay from 2 seconds to 5 seconds.  This should push the
+	chance of seeing an ESTOP:BAD passed all the ESTOP and BUS ENABLE timeouts.
+	3. Precor Bug ID 17261 - Change the software to use the tick sum instead of the current ticks for resetting
+	the speed stall timer.  The hardware changes to lessen the belt start time also has a major impact.
+	4. Precor Bug ID 17273 - Removed the incline checks that were preventing incline motion below zero
+	percent grade.
+	5. Precor Bug ID 17271 and 17264 - Enabled the compiler optimize for debug option.  This speed up the existing
+	software.  The loops per second went from 30K+ to 95K+.  
+	6. Precor Bug ID 17270 and 17263 - A hardware change was implemented to reduce the belt starting delay and
+	increase the acceleration.
+	
+Version 0.8.8 08-11-2021
+
+	1. Additional change to allow elevation below zero and above 15%.  This enables the elevation to properly 
+	bump back when forced below zero or above 15.
+	2. Incline control below zero and above 15% switched to the linear interpolation.  Adding non-linear interpolation
+	for incline outside the normal bounds is not really necessary.
+	
+Version 0.8.9 08-25-2021
+
+	1. Change the frequency of foot fall responses from 3 seconds to 1 second.
+	
+Version 0.8.10 09-02-2021
+
+	1. Changed the foot fall response to be sent as a replacement to response to a command
+	sent from the console.  The previous version appended the foot fall to the response.
+	
+Version 0.8.11 08-08-2021
+
+	1. Added additional check to reset adjust delta when the target speed is zero in the PWM pulse ISR.
+	
+Version 0.8.12 09-09-2021
+
+	1. Moved the adjust delta check to the PWM acceleration/deceleration ISR.  Now the check runs every 37 milliseconds
+	instead of every millisecond.
+	
+Version 0.8.13 09-15-2021
+
+	1. Added the PWM idle value to the EEPROM with a default of 3.  This was done using a second idle PWM memory location
+	that is easier to reach than the structure.  This maximizes the loops per second.
+	2. Changed the ADC sample time for internal voltage reference from 2.5 to 640.5 cycles.  This makes it 
+	consistent with the other ADC entries.  The ADC is clocked at 48MHz.
+	3. Changed the elevation range checking to be programmable with different values for the upper and lower
+	control limits.  The default range is now -1.5% to +15.5%.  Values outside that range will trigger a 
+	range error. Using the serial terminal, you can actually use that expanded range for target grade. To 
+	recover from a range error use the serial terminal and the manual elevation control buttons (Elev OFF, Elev Up, 
+	and Eleve DOWN).
+	4. Changed the console protocol to not respond with a foot fall if the response is to [err].  The foot fall will
+	be delayed to the next command.
+
+Version 0.8.14 09-30-2021
+
+	1. Added RSET and loop to the commands that do not respond with a foot fall.  The debugger will display the 
+	number of times a foot fall is delayed.
+	2. Separated the bump back limit for elevations below zero and above 15 percent.  The default value is 0.2% grade.
+	The bump back limit is still 0.5% for elevations between zero and 15 percent.  This new value is stored in EEPROM
+	and can be change with the debugger.
+	3. The timeout for the range error was reduced from 2 seconds to 1.5 seconds.  This allows the range error 42 to takes
+	precedence over the reverse error 45.  
+	4. New interpolation table and maximum ADC value.  This was derived from Precor test data.
+	
+Version 0.8.15 09-30-2021
+
+	1. Changed the interpolation so that the 15% grade point is ADC 249 and scale is 1.00000.  This fixes the 
+	discontinuity when moving from the interpolated curve to the linear curve when entering the bump back
+	region at grades larger than 15%.
+	
+Version 0.8.16 10-05-2021
+
+	1. Corrected issues wit the [incd] command to support operation even if there is an incline error.
+	The changes include disabling the incline errors (RANGE, STALL, and DIRECTION) and also clearing
+	any incline errors that are pending.
+	
+	2. Changed to the [inc] to make the [inc] stop the include while still allowing [inc:XX] to set
+	the target incline.
+	
+Version 0.8.17 10-07-2021
+
+	1. Removed the limit checking for [incd:1] and [incd:2].  They no longer stop automatically at zero and 15%.
+	2. Removed the elevation error disable and error clearing for the [incd:0].
+	
+Version 0.8.18 10-11-2021
+
+	1. Changed the elevation motion trigger so that it will vary.  This allows the trigger to be smaller
+	when the target grade changes.  The trigger will be longer once the target grade change completes.
+	The current trigger is 0.2% for grade changes and 0.5% when the grade is holding position.
+	
+Version 0.8.19 10-13-2021
+
+	1. Added a 2 second timeout for the manual up and down movement.  This limits any response to a single manual
+	up or down command to approximately 1 percent grade.
+	2. Fixed a problem where the error 32 (communications loss) was not being reset after a RSET command.
+	3. Fixed a problem where the incline range (error 42) was having its read flag constantly being reset.
+	This allowed that error to hide a bus enable (error 25).  This same fix was applied to all the elevation 
+	errors because they all had the same problem.
+	
+Version 0.8.20 10-14-2021
+
+	1. Changed the elevation error checking to only return "true" is the active errors are elevation errors.
+	Any other error will return false.  This will prevent the belt from starting on speed or communications errors
+	if an elevation is also active.
+	2. Changed the manual incline target grade tracking to not exceed the allowable limits (-1.5% to 15.5%).  This 
+	prevents the incline from attempting to drive to low when exiting the manual incline movement and the treadmill
+	has an active elevation range error.
+	
+Version 0.8.21 10-21-2021
+
+	1. Fixed case where ESTOP:BAD should have been sent when there is an active error and the ESTOP is pulled.
+	The solution was to make sure the ESTOP state takes precedence over the error state.
+	2. Changes to allow the elevation to operate manually even when there is an active error, without
+	requiring that error to be cleared. The manual incline will work only with elevation errors, anything
+	else and it won't move.
+	
+Version 0.8.22 10-28-2021
+
+	This is the production release and is the same as version 0.8.21 with a new build number of "006"
+	
+<< end >>
