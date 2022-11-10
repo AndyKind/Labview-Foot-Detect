@@ -2,15 +2,15 @@ Test Operation:
 
 1. Use the Test Builder Excel file to create your test run
 	a. Enter Speed to set in the 1st column. Multiply speed by 10 so 1.0 mph is 10, 2.5 mph is 25 etc
-	   Must be between 10-125
+	   Must be between 10-125 (anything above 125 will be changed to 125 in software)
 	b. Enter time in seconds in the 2nd column
 	c. Enter Incline to set in the 3rd column. Multiply inc by 10 so 1.0 inc is 10, 2.5 inc is 25 etc. 
 	   Must be divisible by 5 and in the range 0-125
 	d. Entere dwell in the 4th column. Use this if changing incline by a lot to add some extra time to hit target
 
-2. Copy the data into a text file and save as "test.txt"
+2. Copy the data into a text file and save as a txt file
 3. Open Prism_Controller.lvproj to open the labview project
-4. Make sure the test script is selected and run the program
+4. Select the test script you just saved and run the program
 5. Use the stop button to manually abort if there are issues, otherwise it will run until it reaches the end of test or an error occurs
 6. The output is saved as "Foot.csv" in this folder
-7. Copy the test and foot files into the Test Runs folder and rename them both with matching UID at the end of the name
+7. Copy the test and foot files into the Test Runs folder and rename them both with matching names
