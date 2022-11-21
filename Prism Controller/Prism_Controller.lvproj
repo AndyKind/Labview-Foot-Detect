@@ -22,6 +22,7 @@
 			<Property Name="ScaleType" Type="Str">Linear</Property>
 		</Item>
 		<Item Name="Main.vi" Type="VI" URL="../Main.vi"/>
+		<Item Name="Main_Manual_Control.vi" Type="VI" URL="../Main_Manual_Control.vi"/>
 		<Item Name="Main_Power.vi" Type="VI" URL="../Main_Power.vi"/>
 		<Item Name="NormStr2HexStr.vi" Type="VI" URL="../NormStr2HexStr.vi"/>
 		<Item Name="Prism_Checksum.vi" Type="VI" URL="../Prism_Checksum.vi"/>
