@@ -10,9 +10,13 @@
 		<Property Name="server.vi.callsEnabled" Type="Bool">true</Property>
 		<Property Name="server.vi.propertiesEnabled" Type="Bool">true</Property>
 		<Property Name="specify.custom.address" Type="Bool">false</Property>
-		<Item Name="Com_Test.vi" Type="VI" URL="../Com_Test.vi"/>
+		<Item Name="Debug" Type="Folder">
+			<Item Name="Com_Test.vi" Type="VI" URL="../Com_Test.vi"/>
+			<Item Name="Control_Test.vi" Type="VI" URL="../Control_Test.vi"/>
+			<Item Name="Main_old.vi" Type="VI" URL="../Main_old.vi"/>
+			<Item Name="Test_Send_and_receive.vi" Type="VI" URL="../Test_Send_and_receive.vi"/>
+		</Item>
 		<Item Name="Commands.ctl" Type="VI" URL="../Commands.ctl"/>
-		<Item Name="Control_Test.vi" Type="VI" URL="../Control_Test.vi"/>
 		<Item Name="current" Type="NI-DAQmx Scale">
 			<Property Name="Lin.Slope" Type="Str">100</Property>
 			<Property Name="Lin.YIntercept" Type="Str">0</Property>
@@ -23,10 +27,8 @@
 		</Item>
 		<Item Name="Main.vi" Type="VI" URL="../Main.vi"/>
 		<Item Name="Main_Manual_Control.vi" Type="VI" URL="../Main_Manual_Control.vi"/>
-		<Item Name="Main_Power.vi" Type="VI" URL="../Main_Power.vi"/>
 		<Item Name="NormStr2HexStr.vi" Type="VI" URL="../NormStr2HexStr.vi"/>
 		<Item Name="Prism_Checksum.vi" Type="VI" URL="../Prism_Checksum.vi"/>
-		<Item Name="Test_Send_and_receive.vi" Type="VI" URL="../Test_Send_and_receive.vi"/>
 		<Item Name="Voltage" Type="NI-DAQmx Scale">
 			<Property Name="Lin.Slope" Type="Str">100</Property>
 			<Property Name="Lin.YIntercept" Type="Str">0</Property>
